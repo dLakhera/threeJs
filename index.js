@@ -30,8 +30,8 @@ loader.load('./microphone/scene.gltf', function (gltf) {
 
 
     micMaterial.map = basetexture;
-    micMaterial.metalnessMap = metalicRoughnesstexture;
-    micMaterial.normalMap = normaltexture;
+   // micMaterial.metalnessMap = metalicRoughnesstexture;
+    //micMaterial.normalMap = normaltexture;
 
     model.material = micMaterial;
     scene.add(model);
