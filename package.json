@@ -1,0 +1,25 @@
+{
+  "name": "threejs",
+  "version": "1.0.0",
+  "description": "3D rendering in javaScript/Reference bruno-simon.com",
+  "main": "index.html",
+  "scripts": {
+    "start": "npm run lite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lite": "lite-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dLakhera/threeJs.git"
+  },
+  "author": "Deepak Lakhera, Nitish Mittal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dLakhera/threeJs/issues"
+  },
+  "homepage": "https://github.com/dLakhera/threeJs#readme",
+  "devDependencies": {
+    "lite-server": "^2.6.1",
+    "three": "^0.123.0"
+  }
+}
