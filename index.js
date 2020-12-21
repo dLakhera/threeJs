@@ -8,7 +8,9 @@ const loader = new GLTFLoader();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 
-camera.position.z =-5;
+camera.position.x = 10;
+camera.position.y = 10;
+// camera.position.z = -10;
 
 renderer.setClearColor(0xffffff);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -18,7 +20,7 @@ document.body.appendChild(renderer.domElement);
 
 
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-hemiLight.position.set(0, 20, 0);
+hemiLight.position.set(20, 20, 20);
 scene.add(hemiLight);
 
 const dirLight = new THREE.DirectionalLight(0xffffff);
@@ -35,8 +37,17 @@ scene.add(dirLight);
 //Microphone
 loader.load('./barbarian/scene.gltf', function (gltf) {
     const model = gltf.scene;
-
     model.scale.multiplyScalar(1/10);
+    
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const center = box.getCenter(new THREE.Vector3());
+
+    model.position.x += (model.position.x - center.x);
+    model.position.y += (model.position.y - center.y);
+    model.position.z += (model.position.z - center.z);
+    
+    // model = gltf.scene;
+
     // model.position.y = -20;
 
     scene.add(model);
