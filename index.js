@@ -11,8 +11,16 @@ const renderer = new THREE.WebGLRenderer();
 // camera.position.x = 5;
 camera.position.y = 5;
 // camera.position.z = 5;
+camera.position.x = -3.4;
+camera.position.y = 1.4;
+camera.position.z = 10;
 
-renderer.setClearColor(0xffffff);
+camera.rotation._x = -0.15;
+camera.rotation._y = -0.34;
+camera.rotation._z = -0.05;
+
+
+renderer.setClearColor('#c8fbfb');
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
@@ -34,29 +42,24 @@ dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
 
 
-// function centeringMethod(model){
-//     const box = new THREE.Box3().setFromObject(gltf.scene);
-//     const center = box.getCenter(new THREE.Vector3());
-
-//     model.position.x += (model.position.x - center.x);
-//     model.position.y += (model.position.y - center.y);
-//     model.position.z += (model.position.z - center.z);
-
-//     return model;
-// }
-
-//Microphone
-loader.load('./barbarian/scene.gltf', function (gltf) {
-    const model = gltf.scene;
-    
-    model.scale.multiplyScalar(1/10);
-    const box = new THREE.Box3().setFromObject(gltf.scene);
+function centeringMethod(model) {
+    const box = new THREE.Box3().setFromObject(model);
     const center = box.getCenter(new THREE.Vector3());
 
     model.position.x += (model.position.x - center.x);
     model.position.y += (model.position.y - center.y);
     model.position.z += (model.position.z - center.z);
-    // centeringMethod(model);
+
+    return model;
+}
+
+//Microphone
+var barb = loader.load('./barbarian/scene.gltf', function (gltf) {
+    const model = gltf.scene;
+
+    model.scale.multiplyScalar(1 / 10);
+
+    centeringMethod(model);
 
     model.position.x = -4;
     scene.add(model);
@@ -68,23 +71,17 @@ loader.load('./barbarian/scene.gltf', function (gltf) {
         renderer.render(scene, camera);
     };
     animate();
-    
+
 }, undefined, function (error) {
 
     console.error(error);
 
 });
 
-loader.load('./fallout/scene.gltf',function(gltf){
+var fallout = loader.load('./fallout/scene.gltf', function (gltf) {
     const model = gltf.scene;
-    // centeringMethod(model);
-    model.scale.multiplyScalar(1/50);
-    const box = new THREE.Box3().setFromObject(gltf.scene);
-    const center = box.getCenter(new THREE.Vector3());
-
-    model.position.x += (model.position.x - center.x);
-    model.position.y += (model.position.y - center.y);
-    model.position.z += (model.position.z - center.z);
+    model.scale.multiplyScalar(1 / 20);
+    centeringMethod(model);
 
     model.position.x = 4;
     scene.add(model);
@@ -96,9 +93,22 @@ loader.load('./fallout/scene.gltf',function(gltf){
         renderer.render(scene, camera);
     };
     animate();
-},undefined, function(error) {
+}, undefined, function (error) {
     console.log(error);
 });
+
+const texture = new THREE.TextureLoader().load("./grassTexture.png");
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set(200, 200);
+
+
+const geometry = new THREE.PlaneGeometry(1000, 1000);
+const material = new THREE.MeshBasicMaterial({ map: texture });
+const plane = new THREE.Mesh(geometry, material);
+plane.rotation.x = -Math.PI / 2;
+plane.position.y = -1;
+scene.add(plane);
 
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -106,5 +116,3 @@ controls.minDistance = 2;
 controls.maxDistance = 10;
 controls.target.set(0, 0, - 0.2);
 controls.update();
-
-renderer.render(scene, camera);
