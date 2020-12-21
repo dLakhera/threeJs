@@ -33,8 +33,8 @@ scene.add(dirLight);
 //Microphone
 loader.load('./microphone/scene.gltf', function (gltf) {
     const model = gltf.scene;
-    const textLoader = new THREE.TextureLoader();
-    const texture = textLoader.load('./microphone/textures/01___Default_metallicRoughness.png')
+    const tl = new THREE.TextureLoader();
+    const texture = tl.load('./microphone/textures/01___Default_metallicRoughness.png')
 
 
 
