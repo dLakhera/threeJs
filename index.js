@@ -8,15 +8,14 @@ const loader = new GLTFLoader();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 
-camera.position.x = 10;
-camera.position.y = 10;
-// camera.position.z = -10;
+// camera.position.x = 5;
+camera.position.y = 5;
+// camera.position.z = 5;
 
 renderer.setClearColor(0xffffff);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
-// camera.position.z = 2;
 
 
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
@@ -34,29 +33,38 @@ dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
 
+
+// function centeringMethod(model){
+//     const box = new THREE.Box3().setFromObject(gltf.scene);
+//     const center = box.getCenter(new THREE.Vector3());
+
+//     model.position.x += (model.position.x - center.x);
+//     model.position.y += (model.position.y - center.y);
+//     model.position.z += (model.position.z - center.z);
+
+//     return model;
+// }
+
 //Microphone
 loader.load('./barbarian/scene.gltf', function (gltf) {
     const model = gltf.scene;
-    model.scale.multiplyScalar(1/10);
     
+    model.scale.multiplyScalar(1/10);
     const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = box.getCenter(new THREE.Vector3());
 
     model.position.x += (model.position.x - center.x);
     model.position.y += (model.position.y - center.y);
     model.position.z += (model.position.z - center.z);
-    
-    // model = gltf.scene;
+    // centeringMethod(model);
 
-    // model.position.y = -20;
-
+    model.position.x = -4;
     scene.add(model);
     const animate = function () {
         requestAnimationFrame(animate);
-        
+
         // model.rotation.x += 0.01;
         model.rotation.y += 0.01;
-    
         renderer.render(scene, camera);
     };
     animate();
@@ -67,23 +75,36 @@ loader.load('./barbarian/scene.gltf', function (gltf) {
 
 });
 
+loader.load('./fallout/scene.gltf',function(gltf){
+    const model = gltf.scene;
+    // centeringMethod(model);
+    model.scale.multiplyScalar(1/50);
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const center = box.getCenter(new THREE.Vector3());
+
+    model.position.x += (model.position.x - center.x);
+    model.position.y += (model.position.y - center.y);
+    model.position.z += (model.position.z - center.z);
+
+    model.position.x = 4;
+    scene.add(model);
+    const animate = function () {
+        requestAnimationFrame(animate);
+
+        // model.rotation.x += 0.01;
+        model.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    };
+    animate();
+},undefined, function(error) {
+    console.log(error);
+});
+
 
 const controls = new OrbitControls(camera, renderer.domElement);
-// controls.addEventListener('change', render); // use if there is no animation loop
 controls.minDistance = 2;
 controls.maxDistance = 10;
 controls.target.set(0, 0, - 0.2);
 controls.update();
 
 renderer.render(scene, camera);
-
-// const animate = function () {
-//     requestAnimationFrame(animate);
-
-//     cube.rotation.x += 0.01;
-//     cube.rotation.y += 0.01;
-
-//     renderer.render(scene, camera);
-// };
-
-// animate();
