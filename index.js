@@ -14,7 +14,7 @@ const clock = new THREE.Clock();
 
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 1;
+const velocity = 2.5;
 const movement = {
 
     moveForward: false,
@@ -224,11 +224,10 @@ loader.load('./car/scene.gltf', function (gltf) {
             changeInPos.x = direction.x * velocity * delta;
             changeInPos.z = direction.z * velocity * delta;
 
-            //model.localToWorld(changeInPos);
-
-            model.rotation.y -= changeInPos.x;
-            //model.position.x += changeInPos.x;
-            model.position.z -= changeInPos.z;
+            let theta = model.rotation.y - changeInPos.x;
+            model.rotation.y = theta;
+            model.position.x -= changeInPos.z*Math.sin(theta);
+            model.position.z -= changeInPos.z*Math.cos(theta);
             console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
             console.log("model location " + model.position.x + " ," + model.position.z)
 
