@@ -9,12 +9,12 @@ var SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Clock for delata time interval
 const clock = new THREE.Clock();
-const delta = clock.getDelta();
+
 
 
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 100.0;
+const velocity = 1;
 const movement = {
 
     moveForward: false,
@@ -104,9 +104,9 @@ function onKeyUp(event) {
 const size = 200;
 const divisions = 200;
 
-const gridHelper = new THREE.GridHelper( size, divisions );
-gridHelper.position.y=-1
-scene.add( gridHelper );
+const gridHelper = new THREE.GridHelper(size, divisions);
+gridHelper.position.y = -1
+scene.add(gridHelper);
 
 
 //Camera
@@ -143,7 +143,7 @@ dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
-scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
 
 // Utility function
 function centeringMethod(model) {
@@ -167,7 +167,7 @@ const gm = new THREE.MeshPhongMaterial({ color: 0xffffff, map: gt });
 const ground = new THREE.Mesh(gg, gm);
 ground.position.y = -1;
 ground.rotation.x = - Math.PI / 2;
-ground.material.map.repeat.set(200,200);
+ground.material.map.repeat.set(200, 200);
 ground.material.map.wrapS = THREE.RepeatWrapping;
 ground.material.map.wrapT = THREE.RepeatWrapping;
 ground.material.map.encoding = THREE.sRGBEncoding;
@@ -212,18 +212,27 @@ loader.load('./car/scene.gltf', function (gltf) {
     model.position.x = 3;
     scene.add(model);
     const animate = function () {
-        
-        direction.x = Number(movement.moveForward) - Number(movement.moveBackward);
-        direction.z = Number(movement.moveRight) - Number(movement.moveLeft);
 
-        direction.normalize();
-        console.log(direction);
-        
-        model.position.x += (direction.x*velocity)*delta;
-        model.position.z += (direction.z*velocity)*delta;
-        
-        console.log("model location"+ model.position.x+" ,"+model.position.z)
+        direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
+        direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
+        if (direction.x + direction.z != 0) {
+            direction.normalize();
+            console.log(direction);
+            const changeInPos = new THREE.Vector3();
+            changeInPos.y = 0;
+            const delta = clock.getDelta();
+            changeInPos.x = direction.x * velocity * delta;
+            changeInPos.z = direction.z * velocity * delta;
 
+            //model.localToWorld(changeInPos);
+
+            model.rotation.y -= changeInPos.x;
+            //model.position.x += changeInPos.x;
+            model.position.z -= changeInPos.z;
+            console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
+            console.log("model location " + model.position.x + " ," + model.position.z)
+
+        }
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     };
@@ -233,12 +242,14 @@ loader.load('./car/scene.gltf', function (gltf) {
 });
 
 
-        // theta += angle*omega*delta;
-        // model.position.x += velocity*delta*Math().cos(theta);
-        // model.position.z += velocity*delta*Math().sin(theta);     
+// theta += angle*omega*delta;
+// model.position.x += velocity*delta*Math().cos(theta);
+// model.position.z += velocity*delta*Math().sin(theta);     
 
 const controls = new OrbitControls(camera, renderer.domElement);
 // controls.minDistance = 2;
 // controls.maxDistance = 10;
 controls.target.set(0, 0, - 0.2);
 controls.update();
+var axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
