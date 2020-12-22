@@ -8,13 +8,14 @@ var SCREEN_WIDTH, SCREEN_HEIGHT;
 
 
 // Clock for delata time interval
-const clock = new THREE.Clock();
-const delta = clock.getDelta();
+// const clock = new THREE.Clock();
+// const delta = 1000*clock.getDelta();
 
+let previousTime = performance.now();
 
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 100.0;
+const velocity = 0.3;
 const movement = {
 
     moveForward: false,
@@ -211,17 +212,19 @@ loader.load('./car/scene.gltf', function (gltf) {
     centeringMethod(model);
     model.position.x = 3;
     scene.add(model);
+    const time = performance.now();
     const animate = function () {
         
-        direction.x = Number(movement.moveForward) - Number(movement.moveBackward);
+        const delta = (time - previousTime)/1000;
+        direction.x = Number(movement.moveBackward) - Number(movement.moveForward);
         direction.z = Number(movement.moveRight) - Number(movement.moveLeft);
 
         direction.normalize();
         console.log(direction);
         
-        model.position.x += (direction.x*velocity)*delta;
-        model.position.z += (direction.z*velocity)*delta;
-        
+        model.position.x += (direction.z*velocity)*delta;
+        model.position.z += (direction.x*velocity)*delta;
+        console.log(delta);
         console.log("model location"+ model.position.x+" ,"+model.position.z)
 
         renderer.render(scene, camera);
