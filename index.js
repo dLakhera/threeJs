@@ -3,19 +3,18 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.123.0/build/three.m
 import { OrbitControls } from "./node_modules/three/examples/jsm/controls/OrbitControls.js";
 
 
+// Default constant variables
+var SCREEN_WIDTH, SCREEN_HEIGHT;
+
+
 // Clock for delata time interval
 const clock = new THREE.Clock();
+const delta = clock.getDelta();
 
 
-// Sperical coordinate variables
-let theta;
-
-//Create Scene
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xc8fbfb);
-scene.fog = new THREE.Fog(0xFFFFFF, 1, 40);
-const loader = new GLTFLoader();
-
+// Motion definition variables
+const direction = new THREE.Vector3();
+const velocity = 100.0;
 const movement = {
 
     moveForward: false,
@@ -26,14 +25,22 @@ const movement = {
 };
 
 
+//Create Scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xc8fbfb);
+scene.fog = new THREE.Fog(0xFFFFFF, 1, 40);
+const loader = new GLTFLoader();
+
+
+
 
 // EVENTS
 window.addEventListener('resize', onWindowResize, false);
 document.addEventListener('keydown', onKeyDown, false);
 document.addEventListener('keyup', onKeyUp, false);
 
-// EVENT HANDLERS
 
+// EVENT HANDLERS
 function onWindowResize() {
     // console.log("WINDOW RESIZED");
     SCREEN_WIDTH = window.innerWidth;
@@ -47,45 +54,45 @@ function onWindowResize() {
 }
 
 function onKeyDown(event) {
-    // console.log("KEY PRESSED DOWN: " + event.keyCode);
+    console.log("KEY PRESSED DOWN: " + event.keyCode);
     switch (event.keyCode) {
 
         case 38: /*up*/
-        case 87: /*W*/ 	controls.moveForward = true; break;
+        case 87: /*W*/ 	movement.moveForward = true; break;
 
         case 40: /*down*/
-        case 83: /*S*/ 	 controls.moveBackward = true; break;
+        case 83: /*S*/ 	 movement.moveBackward = true; break;
 
         case 37: /*left*/
-        case 65: /*A*/ controls.moveLeft = true; break;
+        case 65: /*A*/ movement.moveLeft = true; break;
 
         case 39: /*right*/
-        case 68: /*D*/ controls.moveRight = true; break;
+        case 68: /*D*/ movement.moveRight = true; break;
 
-        //case 67: /*C*/     controls.crouch = true; break;
-        //case 32: /*space*/ controls.jump = true; break;
-        //case 17: /*ctrl*/  controls.attack = true; break;
+        //case 67: /*C*/     movement.crouch = true; break;
+        //case 32: /*space*/ movement.jump = true; break;
+        //case 17: /*ctrl*/  movement.attack = true; break;
 
     }
 
 }
 
 function onKeyUp(event) {
-    // console.log("KEY PRESSED UP: " + event.keyCode);
+    console.log("KEY PRESSED UP: " + event.keyCode);
 
     switch (event.keyCode) {
 
         case 38: /*up*/
-        case 87: /*W*/ controls.moveForward = false; break;
+        case 87: /*W*/ movement.moveForward = false; break;
 
         case 40: /*down*/
-        case 83: /*S*/ 	 controls.moveBackward = false; break;
+        case 83: /*S*/ 	 movement.moveBackward = false; break;
 
         case 37: /*left*/
-        case 65: /*A*/ 	 controls.moveLeft = false; break;
+        case 65: /*A*/ 	 movement.moveLeft = false; break;
 
         case 39: /*right*/
-        case 68: /*D*/ controls.moveRight = false; break;
+        case 68: /*D*/ movement.moveRight = false; break;
 
         //case 67: /*C*/     controls.crouch = false; break;
         //case 32: /*space*/ controls.jump = false; break;
@@ -98,7 +105,7 @@ const size = 200;
 const divisions = 200;
 
 const gridHelper = new THREE.GridHelper( size, divisions );
-gridHelper.position.y=-0.9
+gridHelper.position.y=-1
 scene.add( gridHelper );
 
 
@@ -108,6 +115,7 @@ camera.position.set(-4, 1, 10);
 camera.rotation.set(-0.15, -0.34, -0.05);
 
 //Renderer
+const container = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 //renderer.setClearColor('#c8fbfb');
@@ -117,7 +125,7 @@ renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 //---------
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
 
 //Lighting
@@ -137,7 +145,7 @@ dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
 scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
 
-
+// Utility function
 function centeringMethod(model) {
     const box = new THREE.Box3().setFromObject(model);
     const center = box.getCenter(new THREE.Vector3());
@@ -150,9 +158,9 @@ function centeringMethod(model) {
 }
 
 
-//GROUND
 
-const gt = new THREE.TextureLoader().load("Assets/grass/grass.jpg");
+//GROUND
+const gt = new THREE.TextureLoader().load("assets/grass/grass.jpg");
 const gg = new THREE.PlaneGeometry(1600, 1600);
 const gm = new THREE.MeshPhongMaterial({ color: 0xffffff, map: gt });
 
@@ -169,10 +177,10 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 
-//Add Models
+//ADD MODELS
 
 //Barbarian
-var barb = loader.load('./barbarian/scene.gltf', function (gltf) {
+loader.load('./barbarian/scene.gltf', function (gltf) {
     const model = gltf.scene;
     model.scale.multiplyScalar(1 / 10);
 
@@ -182,7 +190,7 @@ var barb = loader.load('./barbarian/scene.gltf', function (gltf) {
     scene.add(model);
     const animate = function () {
         requestAnimationFrame(animate);
-        console.log(camera.rotation);
+        // console.log(camera.rotation);
         // model.rotation.x += 0.01;
         model.rotation.y += 0.01;
         renderer.render(scene, camera);
@@ -194,29 +202,40 @@ var barb = loader.load('./barbarian/scene.gltf', function (gltf) {
     console.error(error);
 
 });
+
+
 //CAR
-loader.load('./fallout/scene.gltf', function (gltf) {
+loader.load('./car/scene.gltf', function (gltf) {
     const model = gltf.scene;
     model.scale.multiplyScalar(1 / 25);
     centeringMethod(model);
-    model.position.x = 4;
+    model.position.x = 3;
     scene.add(model);
     const animate = function () {
-        requestAnimationFrame(animate);
-        let direction = new THREE.Vector2();
         
-        let translation = Number(movement.moveForward) - Number(movement.moveBackward);
-        let angle = Number(movement.moveRight) - Number(movement.moveLeft);
+        direction.x = Number(movement.moveForward) - Number(movement.moveBackward);
+        direction.z = Number(movement.moveRight) - Number(movement.moveLeft);
 
+        direction.normalize();
+        console.log(direction);
         
+        model.position.x += (direction.x*velocity)*delta;
+        model.position.z += (direction.z*velocity)*delta;
         
+        console.log("model location"+ model.position.x+" ,"+model.position.z)
+
         renderer.render(scene, camera);
+        requestAnimationFrame(animate);
     };
+    animate();
 }, undefined, function (error) {
     console.log(error);
 });
 
 
+        // theta += angle*omega*delta;
+        // model.position.x += velocity*delta*Math().cos(theta);
+        // model.position.z += velocity*delta*Math().sin(theta);     
 
 const controls = new OrbitControls(camera, renderer.domElement);
 // controls.minDistance = 2;
