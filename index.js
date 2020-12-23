@@ -1,4 +1,4 @@
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/loaders/GLTFLoader.min.js';
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.123.0/build/three.module.js';
 import { OrbitControls } from "./node_modules/three/examples/jsm/controls/OrbitControls.js";
 
@@ -102,6 +102,10 @@ function centeringMethod(model) {
     return model;
 }
 
+function vectoriseObjects(params) {
+    return new THREE.Vector3(params.x,params.y,params.z);
+}
+
 // Ground Grid
 
 // const size = 200;
@@ -113,6 +117,7 @@ function centeringMethod(model) {
 
 
 //Camera
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(-4, 4, 4);
 camera.rotation.set(-0.15, -0.34, -0.05);
@@ -194,18 +199,18 @@ scene.add(ground);
 //CAR
 
 var model;
-loader.load('./car/scene.gltf', function (gltf) {
+loader.load('assets/car/scene.gltf', function (gltf) {
     model = gltf.scene;
     model.scale.multiplyScalar(1 / 25);
     centeringMethod(model);
     model.position.x = 3;
+    // model.children.push(camera);
     scene.add(model);
-    console.log(model.position);
-    const time = performance.now();
+    const offsetVector = new THREE.Vector3(model.position.x - camera.position.x, model.position.y - camera.position.y, model.position.z - camera.position.z);
+    // console.log(model.position.x + " " + model.position.y + " " + model.position.z);
+    // console.log(camera.position.x + " " + camera.position.y + " " + camera.position.z);
+    // const time = performance.now();
     const animate = function () {
-
-        // console.log("Camera Position tracker "+camera.position);
-        // console.log(direction);
 
         direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
         direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
@@ -223,6 +228,8 @@ loader.load('./car/scene.gltf', function (gltf) {
             model.position.z -= changeInPos.z * Math.cos(theta);
 
         }
+        var vec = new THREE.Vector3(model.position.x - offsetVector.x, model.position.y - offsetVector.y, model.position.z - offsetVector.z);
+        camera.position.set(vec.x,vec.y,vec.z);
         controls.target.copy(model.position);
         controls.update();
         renderer.render(scene, camera);
@@ -236,6 +243,7 @@ loader.load('./car/scene.gltf', function (gltf) {
 const controls = new OrbitControls(camera, renderer.domElement);
 // To achieve smooth camera motion. For example look here https://www.babylonjs.com/demos/pbrglossy/
 // controls.target.set(0, 0, - 0.2);
+
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.enableDamping = true;
@@ -243,19 +251,7 @@ controls.minPolarAngle = 0.8;
 controls.maxPolarAngle = 2.4;
 controls.dampingFactor = 0.07;
 controls.rotateSpeed = 0.07
+
 // controls.update();
 // var axesHelper = new THREE.AxesHelper(5);
 // scene.add(axesHelper);
-
-document.getElementById("button").onclick = function buttonEvent(params) {
-    // Working code
-    controls.target.set(4, -4, 4);
-
-    // Have to debug, doesn't fire on button press
-    /* Good looking camera angle that we have to transition to smoothly
-        index.js: 207 Vector3 { x: 1.846491687675817, y: 1.7685680479729688, z: -5.491365793428088, isVector3: true }
-    */
-    // const dir = new THREE.Vector3(1.846491687675817,1.7685680479729688,-5.491365793428088);
-    // camera.lookAt(dir);
-    controls.update();
-}
