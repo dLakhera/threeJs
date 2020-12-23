@@ -8,13 +8,14 @@ var SCREEN_WIDTH, SCREEN_HEIGHT;
 const GROUND_ORDINATE = -1.25;
 
 
-// Initial time logged
-let previousTime = performance.now();
+// Clock for delata time interval
+const clock = new THREE.Clock();
+
+
 
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 0.05;
-var rotation = 0;
+const velocity = 2.5;
 const movement = {
     moveForward: false,
     moveBackward: false,
@@ -107,9 +108,9 @@ function centeringMethod(model) {
 const size = 200;
 const divisions = 200;
 
-// const gridHelper = new THREE.GridHelper( size, divisions );
-// gridHelper.position.y= GROUND_ORDINATE;
-// scene.add( gridHelper );
+const gridHelper = new THREE.GridHelper(size, divisions);
+gridHelper.position.y = -1
+scene.add(gridHelper);
 
 
 //Camera
@@ -146,7 +147,6 @@ dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
 scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
-
 
 //GROUND
 const gt = new THREE.TextureLoader().load("assets/grass/grass.jpg");
@@ -203,24 +203,26 @@ loader.load('./car/scene.gltf', function (gltf) {
     scene.add(model);
     const time = performance.now();
     const animate = function () {
-        const time = performance.now();
-        var delta = (time - previousTime) / 1000;
 
-        // const clock = new THREE.Clock();
-        // delta = clock.getDelta();
+        direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
+        direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
+        if (direction.x + direction.z != 0) {
+            direction.normalize();
+            console.log(direction);
+            const changeInPos = new THREE.Vector3();
+            changeInPos.y = 0;
+            const delta = clock.getDelta();
+            changeInPos.x = direction.x * velocity * delta;
+            changeInPos.z = direction.z * velocity * delta;
 
-        const distTravel = velocity * delta;
+            let theta = model.rotation.y - changeInPos.x;
+            model.rotation.y = theta;
+            model.position.x -= changeInPos.z*Math.sin(theta);
+            model.position.z -= changeInPos.z*Math.cos(theta);
+            console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
+            console.log("model location " + model.position.x + " ," + model.position.z)
 
-        direction.x = Number(movement.moveBackward) - Number(movement.moveForward);
-        direction.z = Number(movement.moveRight) - Number(movement.moveLeft);
-
-        direction.normalize();
-
-        model.position.x += direction.z * distTravel;
-        model.position.z += direction.x * distTravel;
-
-        // model.rotation.x += direction.z * 
-
+        }
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     };
@@ -229,45 +231,15 @@ loader.load('./car/scene.gltf', function (gltf) {
     console.log(error);
 });
 
-// function moveCar(){
-//     var distanceMoved = velocity * delta;
-//     var dir = new THREE.Vector3(model.position.x, model.position.y, model.position.z);
-//     dir.sub(camera.position).normalize();
 
-
-//     // direction.normalize();
-//     // console.log(direction);
-
-//     if(movement.moveForward){
-//         model.position.x += distanceMoved * dir.x;
-//         model.position.z += (dir.z) * distanceMoved;
-//     } else if(movement.moveBackward){
-//         model.position.x -= distanceMoved * dir.x;
-//         model.position.z -= (dir.z) * distanceMoved;
-//     }
-// }
-
-// function moveCamera() {
-//     // var delta = clock.getDelta();
-//     const time = performance.now();
-//     const delta = (time - previousTime) / 1000;
-//     var sensitivity = 150;
-//     var rotateAngle = Math.PI / 2 * delta * sensitivity;
-
-//     if(movement.moveRight) rotation -= rotateAngle;
-//     if(movement.moveLeft) rotation += rotateAngle;
-
-//     var rotZ = Math.cos(rotation)
-//     var rotX = Math.sin(rotation)
-//     var distance = 200;
-//     camera.position.x = model.position.x - (distance * rotX);
-//     camera.position.y = model.position.y + 50;
-//     camera.position.z = model.position.z - (distance * rotZ);
-//     camera.lookAt(model.position);
-// }
+// theta += angle*omega*delta;
+// model.position.x += velocity*delta*Math().cos(theta);
+// model.position.z += velocity*delta*Math().sin(theta);     
 
 const controls = new OrbitControls(camera, renderer.domElement);
 // controls.minDistance = 2;
 // controls.maxDistance = 10;
 controls.target.set(0, 0, - 0.2);
 controls.update();
+var axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
