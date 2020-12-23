@@ -5,31 +5,29 @@ import { OrbitControls } from "./node_modules/three/examples/jsm/controls/OrbitC
 
 // Default constant variables
 var SCREEN_WIDTH, SCREEN_HEIGHT;
+const GROUND_ORDINATE = -1.25;
 
 
-// Clock for delata time interval
-// const clock = new THREE.Clock();
-// const delta = 1000*clock.getDelta();
-
+// Initial time logged
 let previousTime = performance.now();
 
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 0.3;
+const velocity = 0.05;
+var rotation = 0;
 const movement = {
-
     moveForward: false,
     moveBackward: false,
     moveLeft: false,
     moveRight: false
-
 };
 
 
 //Create Scene
 const scene = new THREE.Scene();
+scene.add(new THREE.AxesHelper())
 scene.background = new THREE.Color(0xc8fbfb);
-scene.fog = new THREE.Fog(0xFFFFFF, 1, 40);
+// scene.fog = new THREE.Fog(0xFFFFFF, 1, 40);
 const loader = new GLTFLoader();
 
 
@@ -70,12 +68,7 @@ function onKeyDown(event) {
         case 39: /*right*/
         case 68: /*D*/ movement.moveRight = true; break;
 
-        //case 67: /*C*/     movement.crouch = true; break;
-        //case 32: /*space*/ movement.jump = true; break;
-        //case 17: /*ctrl*/  movement.attack = true; break;
-
     }
-
 }
 
 function onKeyUp(event) {
@@ -95,24 +88,33 @@ function onKeyUp(event) {
         case 39: /*right*/
         case 68: /*D*/ movement.moveRight = false; break;
 
-        //case 67: /*C*/     controls.crouch = false; break;
-        //case 32: /*space*/ controls.jump = false; break;
-        //case 17: /*ctrl*/  controls.attack = false; break;
-
     }
 }
+
+// UTILITY FUNCTION
+function centeringMethod(model) {
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+
+    model.position.x += (model.position.x - center.x);
+    model.position.y += (model.position.y - center.y);
+    model.position.z += (model.position.z - center.z);
+
+    return model;
+}
+
 
 const size = 200;
 const divisions = 200;
 
-const gridHelper = new THREE.GridHelper( size, divisions );
-gridHelper.position.y=-1
-scene.add( gridHelper );
+// const gridHelper = new THREE.GridHelper( size, divisions );
+// gridHelper.position.y= GROUND_ORDINATE;
+// scene.add( gridHelper );
 
 
 //Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(-4, 1, 10);
+camera.position.set(-4, 4, 4);
 camera.rotation.set(-0.15, -0.34, -0.05);
 
 //Renderer
@@ -133,7 +135,6 @@ container.appendChild(renderer.domElement);
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
 scene.add(hemiLight);
 
-
 const dirLight = new THREE.DirectionalLight(0xffffff);
 dirLight.position.set(- 3, 10, - 10);
 dirLight.castShadow = true;
@@ -144,20 +145,7 @@ dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
-scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
-
-// Utility function
-function centeringMethod(model) {
-    const box = new THREE.Box3().setFromObject(model);
-    const center = box.getCenter(new THREE.Vector3());
-
-    model.position.x += (model.position.x - center.x);
-    model.position.y += (model.position.y - center.y);
-    model.position.z += (model.position.z - center.z);
-
-    return model;
-}
-
+scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
 
 
 //GROUND
@@ -166,13 +154,12 @@ const gg = new THREE.PlaneGeometry(1600, 1600);
 const gm = new THREE.MeshPhongMaterial({ color: 0xffffff, map: gt });
 
 const ground = new THREE.Mesh(gg, gm);
-ground.position.y = -1;
+ground.position.y = GROUND_ORDINATE;
 ground.rotation.x = - Math.PI / 2;
-ground.material.map.repeat.set(200,200);
+ground.material.map.repeat.set(200, 200);
 ground.material.map.wrapS = THREE.RepeatWrapping;
 ground.material.map.wrapT = THREE.RepeatWrapping;
 ground.material.map.encoding = THREE.sRGBEncoding;
-// note that because the ground does not cast a shadow, .castShadow is left false
 ground.receiveShadow = true;
 
 scene.add(ground);
@@ -206,26 +193,33 @@ loader.load('./barbarian/scene.gltf', function (gltf) {
 
 
 //CAR
+var model;
+var delta = 0;
 loader.load('./car/scene.gltf', function (gltf) {
-    const model = gltf.scene;
+    model = gltf.scene;
     model.scale.multiplyScalar(1 / 25);
     centeringMethod(model);
     model.position.x = 3;
     scene.add(model);
     const time = performance.now();
     const animate = function () {
-        
-        const delta = (time - previousTime)/1000;
+        const time = performance.now();
+        var delta = (time - previousTime) / 1000;
+
+        // const clock = new THREE.Clock();
+        // delta = clock.getDelta();
+
+        const distTravel = velocity * delta;
+
         direction.x = Number(movement.moveBackward) - Number(movement.moveForward);
         direction.z = Number(movement.moveRight) - Number(movement.moveLeft);
 
         direction.normalize();
-        console.log(direction);
-        
-        model.position.x += (direction.z*velocity)*delta;
-        model.position.z += (direction.x*velocity)*delta;
-        console.log(delta);
-        console.log("model location"+ model.position.x+" ,"+model.position.z)
+
+        model.position.x += direction.z * distTravel;
+        model.position.z += direction.x * distTravel;
+
+        // model.rotation.x += direction.z * 
 
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
@@ -235,10 +229,42 @@ loader.load('./car/scene.gltf', function (gltf) {
     console.log(error);
 });
 
+// function moveCar(){
+//     var distanceMoved = velocity * delta;
+//     var dir = new THREE.Vector3(model.position.x, model.position.y, model.position.z);
+//     dir.sub(camera.position).normalize();
 
-        // theta += angle*omega*delta;
-        // model.position.x += velocity*delta*Math().cos(theta);
-        // model.position.z += velocity*delta*Math().sin(theta);     
+
+//     // direction.normalize();
+//     // console.log(direction);
+
+//     if(movement.moveForward){
+//         model.position.x += distanceMoved * dir.x;
+//         model.position.z += (dir.z) * distanceMoved;
+//     } else if(movement.moveBackward){
+//         model.position.x -= distanceMoved * dir.x;
+//         model.position.z -= (dir.z) * distanceMoved;
+//     }
+// }
+
+// function moveCamera() {
+//     // var delta = clock.getDelta();
+//     const time = performance.now();
+//     const delta = (time - previousTime) / 1000;
+//     var sensitivity = 150;
+//     var rotateAngle = Math.PI / 2 * delta * sensitivity;
+
+//     if(movement.moveRight) rotation -= rotateAngle;
+//     if(movement.moveLeft) rotation += rotateAngle;
+
+//     var rotZ = Math.cos(rotation)
+//     var rotX = Math.sin(rotation)
+//     var distance = 200;
+//     camera.position.x = model.position.x - (distance * rotX);
+//     camera.position.y = model.position.y + 50;
+//     camera.position.z = model.position.z - (distance * rotZ);
+//     camera.lookAt(model.position);
+// }
 
 const controls = new OrbitControls(camera, renderer.domElement);
 // controls.minDistance = 2;
