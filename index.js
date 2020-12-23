@@ -123,8 +123,8 @@ const container = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 //renderer.setClearColor('#c8fbfb');
-renderer.setSize(window.innerWidth, window.innerHeight);
-//--------- Documentation Read to understand
+renderer.setSize(container.clientWidth, container.clientHeight);
+//--------- Docuntation Read to understand
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -168,33 +168,33 @@ scene.add(ground);
 //ADD MODELS
 
 //Barbarian
-loader.load('./barbarian/scene.gltf', function (gltf) {
-    const model = gltf.scene;
-    model.scale.multiplyScalar(1 / 10);
+// loader.load('./barbarian/scene.gltf', function (gltf) {
+//     const model = gltf.scene;
+//     model.scale.multiplyScalar(1 / 10);
 
-    centeringMethod(model);
+//     centeringMethod(model);
 
-    model.position.x = -4;
-    scene.add(model);
-    const animate = function () {
-        requestAnimationFrame(animate);
-        // console.log(camera.rotation);
-        // model.rotation.x += 0.01;
-        model.rotation.y += 0.01;
-        renderer.render(scene, camera);
-    };
-    animate();
+//     model.position.x = -4;
+//     scene.add(model);
+//     const animate = function () {
+//         requestAnimationFrame(animate);
+//         // console.log(camera.rotation);
+//         // model.rotation.x += 0.01;
+//         model.rotation.y += 0.01;
+//         renderer.render(scene, camera);
+//     };
+//     animate();
 
-}, undefined, function (error) {
+// }, undefined, function (error) {
 
-    console.error(error);
+//     console.error(error);
 
-});
+// });
 
 
 //CAR
+
 var model;
-var delta = 0;
 loader.load('./car/scene.gltf', function (gltf) {
     model = gltf.scene;
     model.scale.multiplyScalar(1 / 25);
@@ -204,9 +204,11 @@ loader.load('./car/scene.gltf', function (gltf) {
     const time = performance.now();
     const animate = function () {
 
+        console.log(camera.position);
+
         direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
         direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
-        if (direction.x + direction.z != 0) {
+        // if (direction.x + direction.z != 0) {
             direction.normalize();
             console.log(direction);
             const changeInPos = new THREE.Vector3();
@@ -217,12 +219,12 @@ loader.load('./car/scene.gltf', function (gltf) {
 
             let theta = model.rotation.y - changeInPos.x;
             model.rotation.y = theta;
-            model.position.x -= changeInPos.z*Math.sin(theta);
-            model.position.z -= changeInPos.z*Math.cos(theta);
-            console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
-            console.log("model location " + model.position.x + " ," + model.position.z)
+            model.position.x -= changeInPos.z * Math.sin(theta);
+            model.position.z -= changeInPos.z * Math.cos(theta);
+            // console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
+            // console.log("model location " + model.position.x + " ," + model.position.z)
 
-        }
+        // }
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     };
@@ -231,15 +233,29 @@ loader.load('./car/scene.gltf', function (gltf) {
     console.log(error);
 });
 
-
-// theta += angle*omega*delta;
-// model.position.x += velocity*delta*Math().cos(theta);
-// model.position.z += velocity*delta*Math().sin(theta);     
-
 const controls = new OrbitControls(camera, renderer.domElement);
-// controls.minDistance = 2;
-// controls.maxDistance = 10;
+// To achieve smooth camera motion. For example look here https://www.babylonjs.com/demos/pbrglossy/
 controls.target.set(0, 0, - 0.2);
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.enableDamping = true;
+controls.minPolarAngle = 0.8;
+controls.maxPolarAngle = 2.4;
+controls.dampingFactor = 0.07;
+controls.rotateSpeed = 0.07
 controls.update();
 var axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
+
+document.getElementById("button").onclick = function buttonEvent(params) {
+    // Working code
+    controls.target.set(4, -4, 4);
+
+    // Have to debug, doesn't fire on button press
+        /* Good looking camera angle that we have to transition to smoothly
+            index.js: 207 Vector3 { x: 1.846491687675817, y: 1.7685680479729688, z: -5.491365793428088, isVector3: true }
+        */
+        // const dir = new THREE.Vector3(1.846491687675817,1.7685680479729688,-5.491365793428088);
+        // camera.lookAt(dir);
+    controls.update();
+}
