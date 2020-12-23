@@ -1,6 +1,6 @@
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/loaders/GLTFLoader.min.js';
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.123.0/build/three.module.js';
-import { OrbitControls } from "./node_modules/three/examples/jsm/controls/OrbitControls.js";
+import * as THREE from "https://threejs.org/build/three.module.js";
+import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 
 
 // Default constant variables
@@ -214,11 +214,12 @@ loader.load('assets/car/scene.gltf', function (gltf) {
 
         direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
         direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
+        const delta = clock.getDelta();
+
         if (direction.x != 0 || direction.z != 0) {
             direction.normalize();
             const changeInPos = new THREE.Vector3();
             changeInPos.y = 0;
-            const delta = clock.getDelta();
             changeInPos.x = direction.x * velocity * delta;
             changeInPos.z = direction.z * velocity * delta;
 
