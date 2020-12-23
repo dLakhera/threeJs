@@ -11,11 +11,9 @@ const GROUND_ORDINATE = -1.25;
 // Clock for delata time interval
 const clock = new THREE.Clock();
 
-
-
 // Motion definition variables
 const direction = new THREE.Vector3();
-const velocity = 2.5;
+const velocity = 4;
 const movement = {
     moveForward: false,
     moveBackward: false,
@@ -28,7 +26,7 @@ const movement = {
 const scene = new THREE.Scene();
 scene.add(new THREE.AxesHelper())
 scene.background = new THREE.Color(0xc8fbfb);
-// scene.fog = new THREE.Fog(0xFFFFFF, 1, 40);
+scene.fog = new THREE.Fog(0xFFFFFF, 10, 40);
 const loader = new GLTFLoader();
 
 
@@ -104,13 +102,14 @@ function centeringMethod(model) {
     return model;
 }
 
+// Ground Grid
 
-const size = 200;
-const divisions = 200;
+// const size = 200;
+// const divisions = 200;
 
-const gridHelper = new THREE.GridHelper(size, divisions);
-gridHelper.position.y = -1
-scene.add(gridHelper);
+// const gridHelper = new THREE.GridHelper(size, divisions);
+// gridHelper.position.y = -1
+// scene.add(gridHelper);
 
 
 //Camera
@@ -146,7 +145,7 @@ dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add(dirLight);
-scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
+// scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
 
 //GROUND
 const gt = new THREE.TextureLoader().load("assets/grass/grass.jpg");
@@ -201,16 +200,17 @@ loader.load('./car/scene.gltf', function (gltf) {
     centeringMethod(model);
     model.position.x = 3;
     scene.add(model);
+    console.log(model.position);
     const time = performance.now();
     const animate = function () {
 
-        console.log(camera.position);
+        // console.log("Camera Position tracker "+camera.position);
+        // console.log(direction);
 
         direction.z = Number(movement.moveForward) - Number(movement.moveBackward);
         direction.x = Number(movement.moveRight) - Number(movement.moveLeft);
-        // if (direction.x + direction.z != 0) {
+        if (direction.x != 0 || direction.z != 0) {
             direction.normalize();
-            console.log(direction);
             const changeInPos = new THREE.Vector3();
             changeInPos.y = 0;
             const delta = clock.getDelta();
@@ -221,10 +221,10 @@ loader.load('./car/scene.gltf', function (gltf) {
             model.rotation.y = theta;
             model.position.x -= changeInPos.z * Math.sin(theta);
             model.position.z -= changeInPos.z * Math.cos(theta);
-            // console.log(delta + "changeing position by " + changeInPos.x + "i + " + changeInPos.z + "k");
-            // console.log("model location " + model.position.x + " ," + model.position.z)
 
-        // }
+        }
+        controls.target.copy(model.position);
+        controls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     };
@@ -235,7 +235,7 @@ loader.load('./car/scene.gltf', function (gltf) {
 
 const controls = new OrbitControls(camera, renderer.domElement);
 // To achieve smooth camera motion. For example look here https://www.babylonjs.com/demos/pbrglossy/
-controls.target.set(0, 0, - 0.2);
+// controls.target.set(0, 0, - 0.2);
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.enableDamping = true;
@@ -243,19 +243,19 @@ controls.minPolarAngle = 0.8;
 controls.maxPolarAngle = 2.4;
 controls.dampingFactor = 0.07;
 controls.rotateSpeed = 0.07
-controls.update();
-var axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+// controls.update();
+// var axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 document.getElementById("button").onclick = function buttonEvent(params) {
     // Working code
     controls.target.set(4, -4, 4);
 
     // Have to debug, doesn't fire on button press
-        /* Good looking camera angle that we have to transition to smoothly
-            index.js: 207 Vector3 { x: 1.846491687675817, y: 1.7685680479729688, z: -5.491365793428088, isVector3: true }
-        */
-        // const dir = new THREE.Vector3(1.846491687675817,1.7685680479729688,-5.491365793428088);
-        // camera.lookAt(dir);
+    /* Good looking camera angle that we have to transition to smoothly
+        index.js: 207 Vector3 { x: 1.846491687675817, y: 1.7685680479729688, z: -5.491365793428088, isVector3: true }
+    */
+    // const dir = new THREE.Vector3(1.846491687675817,1.7685680479729688,-5.491365793428088);
+    // camera.lookAt(dir);
     controls.update();
 }
