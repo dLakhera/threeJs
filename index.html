@@ -11,15 +11,17 @@
     <style>
         body {
             margin: 0;
-            background-color: #c8fbfb;
+            background-color: #abd2e6;
         }
 
         .jumbotron {
-            background-color: lightskyblue;
+            background-color: rgb(95, 185, 241);
+            height: 10vh;
         }
 
         .footer {
             margin: 0px auto;
+            height: 10vh;
             padding: 20px 0px 20px 0px;
             background-color: #D1C4E9;
         }
@@ -28,33 +30,51 @@
             padding-top: 10px;
             padding-bottom: 10px;
         }
+
+        #c {
+            z-index: 0;
+            height: 70vh;
+        }
+
+        .box {
+            position: relative;
+        }
+
+        .box .stack-top {
+            position: absolute;
+            z-index: 999;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+            text-align: center;
+            top: 40%;
+            /* Adjust this value to move the positioned div up and down */
+            background: rgba(0, 0, 0, 0.8);
+            font-family: Arial, sans-serif;
+        }
     </style>
+
+
 
 </head>
 
 <body>
-
     <div class="jumbotron">
         <h1>ThreeJS Website Dev</h1>
     </div>
 
-    <div class="row">
-        <div class="col-8 col-offset-2">
-            <div id="c"></div>
+    <div>
+        <div class="row">
+            <div class="stack-top" id="BackgroundText">
+                <h1> This is deepak</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 border border-danger box" id="c"></div>
         </div>
     </div>
 
 
-    <footer class="footer">
-        <div class="container">
-            <div class="row row-header">
-                <div class="col-12 d-flex justify-content-center">
-                    <p>Made with ❤️ by <a href="https://github.com/dlakhera/threeJs" target="_blank">
-                            deeBugzz Team</a></p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- SCRIPTS -->
     <script src="js/three.js"></script>
@@ -69,7 +89,16 @@
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 
-
 </body>
+<footer class="footer">
+    <div class="container">
+        <div class="row row-header">
+            <div class="col-12 d-flex justify-content-center">
+                <p>Made with ❤️ by <a href="https://github.com/dlakhera/threeJs" target="_blank">
+                        dBug Team</a></p>
+            </div>
+        </div>
+    </div>
+</footer>
 
 </html>

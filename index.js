@@ -25,12 +25,27 @@ const movement = {
 //Create Scene
 const scene = new THREE.Scene();
 scene.add(new THREE.AxesHelper())
-scene.background = new THREE.Color(0xc8fbfb);
-scene.fog = new THREE.Fog(0xFFFFFF, 10, 40);
+//scene.background = new THREE.Color(0xc8fbfb);
+//scene.fog = new THREE.Fog(0xFFFFFF, 10, 40);
 const loader = new GLTFLoader();
 
+//Renderer
+const container = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+
+renderer.setClearColor(0x000000, 0); // the default
 
 
+//renderer.setClearColor('#c8fbfb');
+renderer.setSize(container.clientWidth, container.clientHeight);
+//--------- Docuntation Read to understand
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+//---------
+
+container.appendChild(renderer.domElement);
 
 // EVENTS
 window.addEventListener('resize', onWindowResize, false);
@@ -41,8 +56,8 @@ document.addEventListener('keyup', onKeyUp, false);
 // EVENT HANDLERS
 function onWindowResize() {
     // console.log("WINDOW RESIZED");
-    SCREEN_WIDTH = window.innerWidth;
-    SCREEN_HEIGHT = window.innerHeight;
+    SCREEN_WIDTH = container.clientWidth;
+    SCREEN_HEIGHT = container.clientHeight;
 
     renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -103,7 +118,7 @@ function centeringMethod(model) {
 }
 
 function vectoriseObjects(params) {
-    return new THREE.Vector3(params.x,params.y,params.z);
+    return new THREE.Vector3(params.x, params.y, params.z);
 }
 
 // Ground Grid
@@ -118,22 +133,11 @@ function vectoriseObjects(params) {
 
 //Camera
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
 camera.position.set(-4, 4, 4);
 camera.rotation.set(-0.15, -0.34, -0.05);
 
-//Renderer
-const container = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-//renderer.setClearColor('#c8fbfb');
-renderer.setSize(container.clientWidth, container.clientHeight);
-//--------- Docuntation Read to understand
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-//---------
-container.appendChild(renderer.domElement);
+
 
 
 //Lighting
@@ -166,7 +170,7 @@ ground.material.map.wrapT = THREE.RepeatWrapping;
 ground.material.map.encoding = THREE.sRGBEncoding;
 ground.receiveShadow = true;
 
-scene.add(ground);
+//scene.add(ground);
 
 
 //ADD MODELS
@@ -230,7 +234,7 @@ loader.load('assets/car/scene.gltf', function (gltf) {
 
         }
         var vec = new THREE.Vector3(model.position.x - offsetVector.x, model.position.y - offsetVector.y, model.position.z - offsetVector.z);
-        camera.position.set(vec.x,vec.y,vec.z);
+        camera.position.set(vec.x, vec.y, vec.z);
         controls.target.copy(model.position);
         controls.update();
         renderer.render(scene, camera);
